@@ -4,6 +4,9 @@ env:
   # The name of the main module repository
   main_project_module: app
 
+  # The name of flutter module
+  flutter_module: flutter_injected
+
   # The name of the Play Store
   playstore_name: Frogobox ID
 
@@ -14,13 +17,24 @@ on:
   pull_request:
     branches: [ master ]
 
+  # The workflow will be dispatched to the default queue
   workflow_dispatch:
-    # The workflow will be dispatched to the default queue
-    branches: [ master ]
 
 jobs:
-  build:
 
+  flutterbuild:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./${{ env.flutter_module }}
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Run Flutter Pub Get
+        run: flutter pub get
+
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -49,24 +63,3 @@ jobs:
       # Run Build Project
       - name: Build gradle project
         run: ./gradlew build
-
-      # Create APK Debug
-      - name: Build apk debug project (APK) - ${{ env.main_project_module }} module
-        run: ./gradlew assembleDebug
-
-      # Create APK Release
-      - name: Build apk release project (APK) - ${{ env.main_project_module }} module
-        run: ./gradlew assemble
-
-      # Create Bundle AAB Release
-      # Noted for main module build [main_project_module]:bundleRelease
-      - name: Build app bundle release (AAB) - ${{ env.main_project_module }} module
-        run: ./gradlew ${{ env.main_project_module }}:bundleRelease
-
-      # Upload Artifact Build
-      # Noted For Output [main_project_module]/build/outputs/bundle/release/
-      - name: Upload AAB (App Bundle) Release - ${{ env.repository_name }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - App bundle(s) AAB release generated
-          path: ${{ env.main_project_module }}/build/outputs/bundle/release/
