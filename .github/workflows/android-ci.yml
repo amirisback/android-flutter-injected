@@ -29,10 +29,17 @@ jobs:
         working-directory: ./${{ env.flutter_module }}
 
     steps:
-      - uses: actions/checkout@v1
-
-      - name: Run Flutter Pub Get
-        run: flutter pub get
+    
+    - name: Run Flutter Pub Get
+    - uses: actions/setup-java@v2
+      with:
+        distribution: 'zulu'
+        java-version: '11'
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '2.10.4'
+    - run: flutter pub get
+    
 
   build:
     runs-on: ubuntu-latest
